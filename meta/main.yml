@@ -1,9 +1,14 @@
 ---
 galaxy_info:
-  author: your name
-  description: your role description
-  company: your company (optional)
-  license: license (GPL-2.0-or-later, MIT, etc)
-  min_ansible_version: 2.9
+  role_name: user
+  author: tomonorimatsumura
+  description: Add Linux user to the system
+  company: no name
+  license: "license (BSD, MIT)"
+  min_ansible_version: 3.0
+  platforms:
+    - name: EL
+      versions:
+        - 7
   galaxy_tags: []
 dependencies: []
