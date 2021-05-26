@@ -6,23 +6,23 @@
   tasks:
     - name: Check whether Linux user is created
       ansible.builtin.shell: "ls -l /home | grep {{ linux_user }}"
-      register: USER_EXISTS
+      register: user_exists
       changed_when: false
 
     - name: Make sure Linux user is created
       ansible.builtin.assert:
         that:
-          - "'{{ linux_user }}' in USER_EXISTS.stdout"
+          - "'{{ linux_user }}' in user_exists.stdout"
 
     - name: Debug var
       debug:
-        var: USER_EXISTS
+        var: user_exists
 
     - name: Check OS version
       ansible.builtin.command: cat /etc/redhat-release
-      register: OS_VERSION
+      register: os_version
       changed_when: false
 
     - name: Show OS version
       ansible.builtin.debug:
-        var: OS_VERSION
+        var: os_version
