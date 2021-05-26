@@ -5,7 +5,11 @@
 
   tasks:
     - name: Check whether Linux user is created
-      ansible.builtin.shell: "ls -l /home | grep {{ linux_user }}"
+      ansible.builtin.shell: |
+        set -o pipefail
+        ls -l /home | grep {{ linux_user }}
+      args:
+        executable: /bin/bash
       register: user_exists
       changed_when: false
 
