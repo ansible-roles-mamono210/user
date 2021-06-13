@@ -1,0 +1,10 @@
+---
+- name: Side effect
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Restart Docker service
+      ansible.builtin.systemd:
+        name: docker.service
+        state: reloaded

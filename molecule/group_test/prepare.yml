@@ -1,0 +1,12 @@
+---
+- name: Prepare
+  hosts: all
+  become: true
+  roles:
+    - geerlingguy.docker
+
+  tasks:
+    - name: Ensure group 'docker' exists
+      ansible.builtin.group:
+        name: docker
+        state: present
