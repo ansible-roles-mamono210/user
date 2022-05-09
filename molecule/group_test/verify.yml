@@ -19,7 +19,7 @@
           - "'{{ linux_user }}' in user_exists.stdout"
 
     - name: Debug var
-      debug:
+      ansible.builtin.debug:
         var: user_exists
 
     - name: Check whether Linux user belongs to 'docker' group
@@ -37,7 +37,7 @@
           - "'{{ linux_groups }}' in user_groups_belongs_to.stdout"
 
     - name: Debug var
-      debug:
+      ansible.builtin.debug:
         var: user_groups_belongs_to
 
     - name: Check OS version

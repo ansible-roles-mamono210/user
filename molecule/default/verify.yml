@@ -19,7 +19,7 @@
           - "'{{ linux_user }}' in user_exists.stdout"
 
     - name: Debug var
-      debug:
+      ansible.builtin.debug:
         var: user_exists
 
     - name: Check OS version
