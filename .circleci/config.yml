@@ -56,6 +56,8 @@ jobs:
         type: string
       molecule-test-image:
         type: string
+      molecule-scenario-name:
+        type: string
     steps:
       - checkout:
           path: << parameters.checkout-path >>
@@ -73,7 +75,7 @@ jobs:
             -v /var/run/docker.sock:/var/run/docker.sock \
             -w /tmp/$(basename "${PWD}") \
             << parameters.molecule-executor-image >> \
-            molecule test
+            molecule test --scenario-name << parameters.molecule-scenario-name >> \
       - run:
           name: Show Ansible version
           command: |
@@ -132,5 +134,8 @@ workflows:
               molecule-test-image:
                 - 'ghcr.io/docker-hub-tm/ansible-test/centos-stream8:latest'
                 - 'ghcr.io/docker-hub-tm/ansible-test/centos7:latest'
+              molecule-scenario-name:
+                - 'default'
+                - 'group_test'
           requires:
             - ansible-lint
