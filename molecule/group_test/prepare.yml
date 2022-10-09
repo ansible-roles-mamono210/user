@@ -3,7 +3,7 @@
   hosts: all
   become: true
   roles:
-    - geerlingguy.docker
+    - mamono210.docker
 
   tasks:
     - name: Ensure group 'docker' exists
