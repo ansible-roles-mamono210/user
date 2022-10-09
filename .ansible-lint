@@ -1,6 +1,4 @@
 ---
-exclude_paths:
-  - molecule/group_test/prepare.yml
 parseable: true
 skip_list:
   - 'no-handler'
