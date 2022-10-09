@@ -1,5 +1,2 @@
 ---
 parseable: true
-skip_list:
-  - 'no-handler'
-  - 'role-name'
