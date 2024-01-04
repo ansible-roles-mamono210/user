@@ -1,14 +1,14 @@
 ---
 - name: Create user accounts
   ansible.builtin.user:
-    name: "{{ linux_user }}"
+    name: "{{ linux_user | default(omit) }}"
     groups: "{{ linux_groups | default(omit) }}"
   loop: '{{ user_profiles }}'
 
 - name: Add authorized keys
   ansible.posix.authorized_key:
-    user: '{{ item.0.name }}'
-    key: '{{ item.1 }}'
+    user: '{{ item.0.name | default(omit) }}'
+    key: '{{ item.1 | default(omit) }}'
   with_subelements:
     - '{{ user_profiles }}'
     - authorized_keys
