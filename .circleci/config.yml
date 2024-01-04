@@ -27,8 +27,6 @@ jobs:
     parameters:
       checkout-path:
         type: string
-      molecule-executor-image:
-        type: string
       molecule-test-image:
         type: string
       molecule-scenario-name:
@@ -37,25 +35,22 @@ jobs:
       - checkout:
           path: << parameters.checkout-path >>
       - run:
-          name: Test with Molecule
+          name: Generate Ansible variable file
           command: |
-            sudo chmod 666 /var/run/docker.sock
-
             cd << parameters.checkout-path >>
-
-            docker run --rm -it \
-            -e MOLECULE_IMAGE=<< parameters.molecule-test-image >> \
-            -v "$(pwd)":/tmp/$(basename "${PWD}"):ro \
-            -v /usr/bin/docker:/usr/bin/docker \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            -w /tmp/$(basename "${PWD}") \
-            << parameters.molecule-executor-image >> \
-            molecule test --scenario-name << parameters.molecule-scenario-name >> \
+            pub_key=$(cat $HOME/.ssh/id_rsa.pub)
+            working_dir=$(pwd)
+            sed -i "s/id_rsa.pub/${pub_key}/" "${working_dir}/molecule/variable_template.yml"
+            mv "${working_dir}/molecule/variable_template.yml" "${working_dir}/defaults/main.yml"
+      - run:
+          name: Install requirements
+          command: |
+            cd << parameters.checkout-path >>
+            pip3 install --user -r molecule/requirements.txt
       - run:
           name: Show Ansible version
           command: |
-            docker run --rm -it \
-            << parameters.molecule-executor-image >> \
+            export PATH="$PATH:$HOME/.local/bin/"
             ansible --version \
             | GREP_COLORS='mt=01;34' egrep --color=always '[[:digit:]]' \
             | GREP_COLORS='mt=01;34' egrep --color=always '\.' \
@@ -63,9 +58,25 @@ jobs:
       - run:
           name: Show Molecule version
           command: |
-            docker run --rm -it \
-            << parameters.molecule-executor-image >> \
+            export PATH="$PATH:$HOME/.local/bin/"
             molecule --version
+      - run:
+          name: Test with Molecule
+          command: |
+            export PATH="$PATH:$HOME/.local/bin/"
+            cd << parameters.checkout-path >>
+            molecule test --scenario-name << parameters.molecule-scenario-name >>
+          environment:
+            ANSIBLE_FORCE_COLOR: '1'
+            ANSIBLE_COLLECTIONS_PATH: "/home/circleci/.local/lib/python3.9/site-packages/ansible/collections"
+            MOLECULE_IMAGE: "<< parameters.molecule-test-image >>"
+            PY_COLORS: '1'
+            TZ: 'Asia/Tokyo'
+      - run:
+          name: SSH test
+          command: |
+            ssh -oStrictHostKeyChecking=no ansible@localhost -p 2222 "whoami; cat /etc/redhat-release"
+            ssh -oStrictHostKeyChecking=no root@localhost -p 2222 "whoami; cat /etc/redhat-release"
   trailing-whitespace:
     executor: trailing-whitespace
     steps:
@@ -95,11 +106,10 @@ workflows:
             parameters:
               checkout-path:
                 - 'user'
-              molecule-executor-image:
-                - 'ghcr.io/docker-images-mamono210/circleci-executors/molecule-docker:latest'
               molecule-test-image:
-                - 'ghcr.io/docker-images-mamono210/ansible-test/centos-stream8:latest'
-                - 'ghcr.io/docker-images-mamono210/ansible-test/centos7:latest'
+                - 'ghcr.io/docker-images-mamono210/ansible-test/centos-stream8-ssh:latest'
+                - 'ghcr.io/docker-images-mamono210/ansible-test/centos-stream9-ssh:latest'
+                - 'ghcr.io/docker-images-mamono210/ansible-test/centos7-ssh:latest'
               molecule-scenario-name:
                 - 'default'
                 - 'group_test'
