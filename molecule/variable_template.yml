@@ -1,5 +1,5 @@
 ---
-users:
+user_profiles:
   - name: ansible
     authorized_keys:
       - 'id_rsa.pub'
