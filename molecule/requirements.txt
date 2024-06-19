@@ -1,5 +1,4 @@
-wheel
-docker
 ansible
+boto
+boto3
 molecule
-molecule-plugins[docker]

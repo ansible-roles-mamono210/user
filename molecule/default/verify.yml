@@ -4,6 +4,31 @@
   become: true
 
   tasks:
+    - name: Gather facts
+      ansible.builtin.setup:
+      register: results
+      delegate_to: localhost
+
+    - name: Populate instance config
+      ansible.builtin.set_fact:
+        instance_conf: "{{ lookup('file', molecule_instance_config) | from_yaml }}"
+
+    - name: Set fact for Public IP
+      ansible.builtin.set_fact:
+        public_ip: "{{ item.address }}"
+      with_items: "{{ instance_conf }}"
+
+    - name: Check if SSH connection is possible
+      ansible.builtin.command:
+        cmd: "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /home/circleci/.ssh/id_rsa ansible@{{ public_ip }} whoami"
+      register: ssh_results
+      changed_when: false
+      delegate_to: localhost
+
+    - name: Debug var
+      ansible.builtin.debug:
+        var: ssh_results
+
     - name: Check whether Linux user is created
       ansible.builtin.shell: |
         set -o pipefail

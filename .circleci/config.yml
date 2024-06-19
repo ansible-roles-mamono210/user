@@ -2,10 +2,6 @@
 version: 2.1
 
 executors:
-  molecule:
-    machine:
-      image: ubuntu-2004:202111-02
-    resource_class: medium
   trailing-whitespace:
     docker:
       - image: ghcr.io/docker-images-mamono210/circleci-executors/trailing-whitespace:latest
@@ -13,6 +9,8 @@ executors:
 
 orbs:
   ansible-lint: orbss/ansible-lint@0.0.3
+  aws-cli: circleci/aws-cli@3.1.1
+  molecule-ec2: orbss/molecule-ec2@0.0.9
   yamllint: orbss/yamllint@0.0.4
 
 jobs:
@@ -23,60 +21,63 @@ jobs:
       - ansible-lint/execute:
           molecule-role-test: true
   molecule:
-    executor: molecule
+    machine:
+      image: ubuntu-2204:2023.10.1
+    resource_class: medium
     parameters:
-      checkout-path:
+      ansible-user:
         type: string
-      molecule-test-image:
+      aws-ami-name:
+        type: string
+      aws-ami-owner-id:
+        type: string
+      aws-instance-type:
+        type: string
+      aws-resource-name:
+        type: string
+      aws-session-duration:
+        type: string
+      aws-vpc-subnet-id:
+        type: string
+      circleci-timeout:
         type: string
       molecule-scenario-name:
         type: string
+        default: default
+    working_directory: ~/user
     steps:
-      - checkout:
-          path: << parameters.checkout-path >>
+      - checkout
+      - aws-cli/setup
+      - aws-cli/setup:
+          profile-name: default
+          role-arn: ${AWS_ROLE_ARN}
+          role-session-name: << parameters.aws-resource-name >>
+          session-duration: << parameters.aws-session-duration >>
+      - run:
+          name: Install Molecule and dependencies
+          command: |
+            pip3 install -r molecule/requirements.txt
       - run:
           name: Generate Ansible variable file
           command: |
-            cd << parameters.checkout-path >>
             pub_key=$(cat $HOME/.ssh/id_rsa.pub)
             working_dir=$(pwd)
             sed -i "s/id_rsa.pub/${pub_key}/" "${working_dir}/molecule/variable_template.yml"
             mv "${working_dir}/molecule/variable_template.yml" "${working_dir}/defaults/main.yml"
-      - run:
-          name: Install requirements
-          command: |
-            cd << parameters.checkout-path >>
-            pip3 install --user -r molecule/requirements.txt
-      - run:
-          name: Show Ansible version
-          command: |
-            export PATH="$PATH:$HOME/.local/bin/"
-            ansible --version \
-            | GREP_COLORS='mt=01;34' egrep --color=always '[[:digit:]]' \
-            | GREP_COLORS='mt=01;34' egrep --color=always '\.' \
-            | GREP_COLORS='mt=01;33' egrep --color=always 'ansible.* '
-      - run:
-          name: Show Molecule version
-          command: |
-            export PATH="$PATH:$HOME/.local/bin/"
-            molecule --version
-      - run:
-          name: Test with Molecule
-          command: |
-            export PATH="$PATH:$HOME/.local/bin/"
-            cd << parameters.checkout-path >>
-            molecule test --scenario-name << parameters.molecule-scenario-name >>
-          environment:
-            ANSIBLE_FORCE_COLOR: '1'
-            ANSIBLE_COLLECTIONS_PATH: "/home/circleci/.local/lib/python3.9/site-packages/ansible/collections"
-            MOLECULE_IMAGE: "<< parameters.molecule-test-image >>"
-            PY_COLORS: '1'
-            TZ: 'Asia/Tokyo'
-      - run:
-          name: SSH test
-          command: |
-            ssh -oStrictHostKeyChecking=no ansible@localhost -p 2222 "whoami; cat /etc/redhat-release"
-            ssh -oStrictHostKeyChecking=no root@localhost -p 2222 "whoami; cat /etc/redhat-release"
+      - molecule-ec2/execute:
+          ansible-user: << parameters.ansible-user >>
+          aws-ami-name: << parameters.aws-ami-name >>
+          aws-ami-owner-id: << parameters.aws-ami-owner-id >>
+          aws-instance-type: << parameters.aws-instance-type >>
+          aws-resource-name: << parameters.aws-resource-name >>
+          aws-vpc-subnet-id: << parameters.aws-vpc-subnet-id >>
+          circleci-timeout: << parameters.circleci-timeout >>
+          molecule-scenario-name: << parameters.molecule-scenario-name >>
+  yamllint:
+    executor: yamllint/default
+    steps:
+      - checkout
+      - yamllint/execute
   trailing-whitespace:
     executor: trailing-whitespace
     steps:
@@ -84,11 +85,6 @@ jobs:
       - run:
           name: Execute trailing-whitespace
           command: trailing-whitespace
-  yamllint:
-    executor: yamllint/default
-    steps:
-      - checkout
-      - yamllint/execute
 
 workflows:
   version: 2.1
@@ -102,16 +98,28 @@ workflows:
           requires:
             - yamllint
       - molecule:
-          matrix:
-            parameters:
-              checkout-path:
-                - 'user'
-              molecule-test-image:
-                - 'ghcr.io/docker-images-mamono210/ansible-test/centos-stream8-ssh:latest'
-                - 'ghcr.io/docker-images-mamono210/ansible-test/centos-stream9-ssh:latest'
-                - 'ghcr.io/docker-images-mamono210/ansible-test/centos7-ssh:latest'
-              molecule-scenario-name:
-                - 'default'
-                - 'group_test'
+          ansible-user: 'ec2-user'
+          aws-ami-name: 'centos-stream9-1*'
+          aws-ami-owner-id: '808683561341'
+          aws-instance-type: 't2.micro'
+          aws-resource-name: 'circleci_ansible-roles_user_centos-stream9'
+          aws-session-duration: '3600'
+          aws-vpc-subnet-id: 'subnet-022a704b3061b8b39'
+          circleci-timeout: '15m'
+          molecule-scenario-name: 'default'
+          context: 'aws-oidc'
+          requires:
+            - ansible-lint
+      - molecule:
+          ansible-user: 'ec2-user'
+          aws-ami-name: 'centos-stream9-1*'
+          aws-ami-owner-id: '808683561341'
+          aws-instance-type: 't2.micro'
+          aws-resource-name: 'circleci_ansible-roles_user_group_centos-stream9'
+          aws-session-duration: '3600'
+          aws-vpc-subnet-id: 'subnet-022a704b3061b8b39'
+          circleci-timeout: '15m'
+          molecule-scenario-name: 'group_test'
+          context: 'aws-oidc'
           requires:
             - ansible-lint
