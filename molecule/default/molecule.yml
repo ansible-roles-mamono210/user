@@ -38,7 +38,8 @@ provisioner:
   connection_options:
     ansible_user: ${ANSIBLE_USER}
     profile: default
-    linux_user: test
+    linux_user: ansible
+    linux_groups: docker
   log: true
 verifier:
   name: ansible

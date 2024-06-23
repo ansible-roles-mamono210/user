@@ -1,6 +1,10 @@
 ---
 users:
   - name: ansible
+    groups: docker
+    authorized_keys:
+      - 'id_rsa.pub'
+  - name: nogroups
     authorized_keys:
       - 'id_rsa.pub'
   - name: root

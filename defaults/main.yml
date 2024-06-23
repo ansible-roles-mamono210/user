@@ -2,6 +2,7 @@
 # users and pub keys example
 # users:
 #   - name: user1
+#     groups: user1
 #     authorized_keys:
 #       - 'ssh-rsa AAAAB3NzaC1yc2EAAAAXFAABAAABAQDiIvaWih4v7YVMtUdzB86E6nCAmBPtM8J4x6jnJHIKvlW+GEtDIFUuy5wkLrlgS8sr6dYqDaqBVySZ6VumcFQRuj1E4jrMQ1FfsxC5RqfUDRAeDwOXfHr+TdD/bGkDtgmZ7ssmGuWI9xHM1WU4XULBuwmq1CbCAfEBSotKx46WAQr17B7NVMKpSilb3lizmtObDm2AXqpQm2/Z+4ko59kdQf/4m91NCdm2Ip1+eapIavttIYazVxDpxCbXQPrY7sHXOj0kux93mlTM0LxrsQ17ELlGRVJ6UvQO/Lje7CqQJUKIONLkiZc7hguHttaxc822OrkdEWhkWJRzvOMliZV'
 #       - 'ssh-rsa AAAAB3NzaC1yc2EAAAAXFAABAAABAQC/aT4MNTGiWEM3K/i57EYOmrvAe2L3zVecQQUhzXZzDckWeUkpo4h3FfsJBqPjUBYPwfUhH25Zu3rL2fRWq2FcT5VkKV7KJTrVFE/JBVfeVeqvl6T6pN7x72tUFDubo2sNbdxtymiqx12CUyKpVqIjQDLHhaHZFrtVzE3BX+Iyd8uclYEH1gl32TWMsaLo8w5tBGjnbfcwqRDTezZD1TR9en5AVac87pUP6gNtr/iUnztYEVo9Or62T7cZK7moRjktiO1hj7+zcirEh0T+WJmFb9+kgpJekrfAx7lPzYwNSqP8/tA2SLwFxqJNA6ogoZDSm3PPUNWbWh3DvT5QyB3'
