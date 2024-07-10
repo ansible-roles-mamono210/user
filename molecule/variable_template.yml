@@ -8,5 +8,3 @@ users:
     authorized_keys:
       - 'id_rsa.pub'
   - name: root
-    authorized_keys:
-      - 'id_rsa.pub'

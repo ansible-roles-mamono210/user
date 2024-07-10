@@ -7,8 +7,10 @@
 
 - name: Add authorized keys
   ansible.posix.authorized_key:
-    user: '{{ item.0.name }}'
-    key: '{{ item.1 }}'
-  with_subelements:
-    - '{{ users }}'
-    - authorized_keys
+    user: '{{ item.name }}'
+    key: '{{ item_key }}'
+  loop: '{{ users }}'
+  vars:
+    authorized_keys: '{{ item.authorized_keys | default([]) }}'
+    item_key: '{{ authorized_keys | first }}'
+  when: authorized_keys | length > 0
