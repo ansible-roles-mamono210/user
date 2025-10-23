@@ -47,7 +47,7 @@
         that:
           - linux_user in user_exists.stdout
 
-    - name: Debug var
+    - name: Debug user existence check result
       ansible.builtin.debug:
         var: user_exists
 
@@ -65,7 +65,7 @@
         that:
           - linux_groups in user_groups_belongs_to.stdout
 
-    - name: Debug var
+    - name: Debug user groups check result
       ansible.builtin.debug:
         var: user_groups_belongs_to
 
