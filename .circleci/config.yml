@@ -60,9 +60,21 @@ jobs:
       - run:
           name: Generate Ansible variable file
           command: |
-            pub_key=$(cat $HOME/.ssh/id_rsa.pub)
-            working_dir=$(pwd)
-            sed -i "s/id_rsa.pub/${pub_key}/" "${working_dir}/molecule/variable_template.yml"
+            set -euo pipefail
+
+            working_dir="$(pwd)"
+
+            pub_key="$(cat "$HOME/.ssh/id_rsa.pub")"
+
+            ssh-keygen -t rsa -b 4096 -N "" -q -f "$HOME/.ssh/id_rsa2"
+            pub_key2="$(cat "$HOME/.ssh/id_rsa2.pub")"
+
+            # Escape / and & for sed (use | as the delimiter instead of /)
+            esc() { printf '%s' "$1" | sed -e 's/[\/&]/\\&/g'; }
+
+            sed -i "s|id_rsa\.pub|$(esc "$pub_key")|" "${working_dir}/molecule/variable_template.yml"
+            sed -i "s|id_rsa2\.pub|$(esc "$pub_key2")|" "${working_dir}/molecule/variable_template.yml"
+
             mv "${working_dir}/molecule/variable_template.yml" "${working_dir}/defaults/main.yml"
       - molecule-ec2/execute:
           ansible-user: << parameters.ansible-user >>

@@ -7,4 +7,5 @@ users:
   - name: nogroups
     authorized_keys:
       - 'id_rsa.pub'
+      - 'id_rsa2.pub'
   - name: root
