@@ -3,7 +3,7 @@
 Role Description
 =========
 
-Create Linux user for CentOS7.
+Create Linux user for Linux
 
 Requirements
 ------------

@@ -1,14 +1,14 @@
 ---
+dependencies: []
 galaxy_info:
-  role_name: user
   author: mamono210
-  description: Add Linux user to the system
   company: no name
+  description: Add Linux user to the system
+  galaxy_tags: []
   license: "license (BSD, MIT)"
-  min_ansible_version: 10.0.1
+  min_ansible_version: 13.4.0
   platforms:
     - name: EL
       release:
         - 9
-  galaxy_tags: []
-dependencies: []
+  role_name: user
